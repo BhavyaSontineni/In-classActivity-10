@@ -1,161 +1,148 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:intl/intl.dart';
 
-
-
-void main() => runApp(const MyApp());
-
-
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
-
-  const MyApp({super.key});
-
-
-
   @override
-
   Widget build(BuildContext context) {
-
-    const appTitle = 'Form Validation Demo';
-
-
-
     return MaterialApp(
-
-      title: appTitle,
-
-      home: Scaffold(
-
-        appBar: AppBar(
-
-          title: const Text(appTitle),
-
-        ),
-
-        body: const MyCustomForm(),
-
-      ),
-
+      debugShowCheckedModeBanner: false,
+      title: 'Flutter Signup',
+      home: SignupPage(),
     );
-
   }
-
 }
 
-
-
-// Create a Form widget.
-
-class MyCustomForm extends StatefulWidget {
-
-  const MyCustomForm({super.key});
-
-
-
+class SignupPage extends StatefulWidget {
   @override
-
-  MyCustomFormState createState() {
-
-    return MyCustomFormState();
-
-  }
-
+  _SignupPageState createState() => _SignupPageState();
 }
 
-
-
-// Create a corresponding State class.
-
-// This class holds data related to the form.
-
-class MyCustomFormState extends State<MyCustomForm> {
-
-  // Create a global key that uniquely identifies the Form widget
-
-  // and allows validation of the form.
-
-  //
-
-  // Note: This is a GlobalKey<FormState>,
-
-  // not a GlobalKey<MyCustomFormState>.
-
-  final _formKey = GlobalKey<FormState>();
-
-
+class _SignupPageState extends State<SignupPage> {
+  final _formKey = GlobalKey<FormBuilderState>();
 
   @override
-
   Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Sign Up")),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: FormBuilder(
+          key: _formKey,
+          child: Column(
+            children: [
+              // First Row: Name (First Name & Last Name)
+              Row(
+                children: [
+                  Expanded(
+                    child: FormBuilderTextField(
+                      name: 'first_name',
+                      decoration: InputDecoration(labelText: "First Name"),
+                      validator: FormBuilderValidators.required(errorText: "First Name is required"),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: FormBuilderTextField(
+                      name: 'last_name',
+                      decoration: InputDecoration(labelText: "Last Name"),
+                      validator: FormBuilderValidators.required(errorText: "Last Name is required"),
+                    ),
+                  ),
+                ],
+              ),
+              
+              SizedBox(height: 16),
 
-    // Build a Form widget using the _formKey created above.
+              // Second Row: Email & Contact Number
+              Row(
+                children: [
+                  Expanded(
+                    child: FormBuilderTextField(
+                      name: 'email',
+                      decoration: InputDecoration(labelText: "Email"),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(errorText: "Email is required"),
+                        FormBuilderValidators.email(errorText: "Enter a valid email"),
+                      ]),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: FormBuilderTextField(
+                      name: 'contact_no',
+                      decoration: InputDecoration(labelText: "Contact No."),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(errorText: "Contact No. is required"),
+                        FormBuilderValidators.numeric(errorText: "Enter a valid number"),
+                        FormBuilderValidators.minLength(10, errorText: "Enter a valid 10-digit number"),
+                      ]),
+                    ),
+                  ),
+                ],
+              ),
+              
+              SizedBox(height: 16),
 
-    return Form(
+              // Third Row: Date of Birth & Aadhar
+              Row(
+                children: [
+                  Expanded(
+                    child: FormBuilderDateTimePicker(
+                      name: 'dob',
+                      decoration: InputDecoration(labelText: "Date of Birth"),
+                      inputType: InputType.date,
+                      format: DateFormat('yyyy-MM-dd'),
+                      validator: FormBuilderValidators.required(errorText: "DOB is required"),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: FormBuilderTextField(
+                      name: 'aadhar',
+                      decoration: InputDecoration(labelText: "Aadhar Number"),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(errorText: "Aadhar is required"),
+                        FormBuilderValidators.numeric(errorText: "Enter a valid Aadhar number"),
+                        FormBuilderValidators.minLength(12, errorText: "Aadhar should be 12 digits"),
+                      ]),
+                    ),
+                  ),
+                ],
+              ),
 
-      key: _formKey,
+              SizedBox(height: 16),
 
-      child: Column(
+              // Fourth Row: Address
+              FormBuilderTextField(
+                name: 'address',
+                decoration: InputDecoration(labelText: "Address"),
+                maxLines: 3,
+                validator: FormBuilderValidators.required(errorText: "Address is required"),
+              ),
 
-        crossAxisAlignment: CrossAxisAlignment.start,
+              SizedBox(height: 16),
 
-        children: [
-
-          TextFormField(
-
-            // The validator receives the text that the user has entered.
-
-            validator: (value) {
-
-              if (value == null || value.isEmpty) {
-
-                return 'Please enter some text';
-
-              }
-
-              return null;
-
-            },
-
+              // Signup Button
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.saveAndValidate()) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Signup Successful')));
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please fix the errors')));
+                  }
+                },
+                child: Text("Sign Up"),
+              ),
+            ],
           ),
-
-          Padding(
-
-            padding: const EdgeInsets.symmetric(vertical: 16),
-
-            child: ElevatedButton(
-
-              onPressed: () {
-
-                // Validate returns true if the form is valid, or false otherwise.
-
-                if (_formKey.currentState!.validate()) {
-
-                  // If the form is valid, display a snackbar. In the real world,
-
-                  // you'd often call a server or save the information in a database.
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-
-                    const SnackBar(content: Text('Processing Data')),
-
-                  );
-
-                }
-
-              },
-
-              child: const Text('Submit'),
-
-            ),
-
-          ),
-
-        ],
-
+        ),
       ),
-
     );
-
   }
-
 }
